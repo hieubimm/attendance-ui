@@ -1,5 +1,5 @@
 import React from 'react';
-import './Welcome.css';
+import '../../styles/components/Welcome.css';
 
 interface WelcomeProps {
   name?: string;

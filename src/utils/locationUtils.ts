@@ -1,4 +1,57 @@
 import { GPSLocation, WiFiInfo } from '../types/auth';
+import { officeConfig } from '../config/officeConfig';
+
+// Function để tính khoảng cách giữa 2 điểm GPS (Haversine formula)
+export const calculateDistance = (
+  lat1: number, 
+  lng1: number, 
+  lat2: number, 
+  lng2: number
+): number => {
+  const R = 6371e3; // Bán kính trái đất (mét)
+  const phi1 = lat1 * Math.PI / 180;
+  const phi2 = lat2 * Math.PI / 180;
+  const deltaPhi = (lat2 - lat1) * Math.PI / 180;
+  const deltaLambda = (lng2 - lng1) * Math.PI / 180;
+
+  const a = Math.sin(deltaPhi / 2) * Math.sin(deltaPhi / 2) +
+    Math.cos(phi1) * Math.cos(phi2) *
+    Math.sin(deltaLambda / 2) * Math.sin(deltaLambda / 2);
+  const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+
+  return R * c; // Kết quả tính bằng mét
+};
+
+// Function để kiểm tra vị trí có trong phạm vi của bất kỳ cơ sở nào không
+export const isWithinAnyOfficeRadius = (
+  userLat: number, 
+  userLng: number
+): { isInRange: boolean; nearestOffice: any; distance: number } => {
+  let minDistance = Infinity;
+  let nearestOffice = null;
+
+  for (const office of officeConfig.officeLocations) {
+    const distance = calculateDistance(
+      userLat,
+      userLng,
+      office.lat,
+      office.lng
+    );
+    
+    if (distance < minDistance) {
+      minDistance = distance;
+      nearestOffice = office;
+    }
+  }
+
+  const isInRange = minDistance <= officeConfig.allowedRadius;
+  
+  return {
+    isInRange,
+    nearestOffice,
+    distance: minDistance
+  };
+};
 
 // Function để lấy GPS location
 export const getGPSLocation = (): Promise<GPSLocation> => {
@@ -36,11 +89,22 @@ export const getWiFiInfo = async (): Promise<WiFiInfo | null> => {
     // Thử sử dụng Network Information API nếu có
     if ('connection' in navigator && (navigator as any).connection) {
       const connection = (navigator as any).connection;
+      
+      // Kiểm tra loại kết nối
+      const connectionType = connection.effectiveType || connection.type || 'unknown';
+      const isWiFi = connectionType === 'wifi' || connectionType === '4g' || connectionType === '3g';
+      
       const wifiInfo: WiFiInfo = {
-        ssid: connection.effectiveType || 'unknown',
+        ssid: isWiFi ? 'WiFi_Connection' : connectionType,
         signal_strength: connection.downlink || 0
       };
-      console.log('📶 WiFi Info (Network API):', wifiInfo);
+      
+      console.log('📶 Network Info (Network API):', {
+        connectionType,
+        isWiFi,
+        wifiInfo
+      });
+      
       return wifiInfo;
     }
 
@@ -49,10 +113,10 @@ export const getWiFiInfo = async (): Promise<WiFiInfo | null> => {
       ssid: 'web-app',
       bssid: 'unknown'
     };
-    console.log('📶 WiFi Info (Fallback):', wifiInfo);
+    console.log('📶 Network Info (Fallback):', wifiInfo);
     return wifiInfo;
   } catch (error) {
-    console.error('❌ WiFi Error:', error);
+    console.error('❌ Network Error:', error);
     return null;
   }
 };

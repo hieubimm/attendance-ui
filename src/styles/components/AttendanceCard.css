@@ -165,12 +165,9 @@
 .refresh-section {
   text-align: center;
   margin-bottom: 20px;
-  display: flex;
-  gap: 10px;
-  justify-content: center;
 }
 
-.refresh-btn, .location-test-btn {
+.refresh-btn {
   background: linear-gradient(45deg, #3498db, #2980b9);
   color: white;
   border: none;
@@ -182,20 +179,12 @@
   transition: all 0.3s ease;
 }
 
-.location-test-btn {
-  background: linear-gradient(45deg, #f093fb, #f5576c);
-}
-
-.refresh-btn:hover:not(:disabled), .location-test-btn:hover:not(:disabled) {
+.refresh-btn:hover:not(:disabled) {
   transform: translateY(-2px);
   box-shadow: 0 5px 15px rgba(52, 152, 219, 0.3);
 }
 
-.location-test-btn:hover:not(:disabled) {
-  box-shadow: 0 5px 15px rgba(240, 147, 251, 0.4);
-}
-
-.refresh-btn:disabled, .location-test-btn:disabled {
+.refresh-btn:disabled {
   background: #bdc3c7;
   color: #7f8c8d;
   cursor: not-allowed;
@@ -203,59 +192,7 @@
   box-shadow: none;
 }
 
-.location-info {
-  background: linear-gradient(135deg, #74b9ff 0%, #0984e3 100%);
-  color: white;
-  padding: 20px;
-  border-radius: 10px;
-  margin-top: 20px;
-}
 
-.location-info h4 {
-  margin: 0 0 15px 0;
-  font-size: 1.2rem;
-  font-weight: 600;
-}
-
-.location-item {
-  display: flex;
-  align-items: center;
-  margin-bottom: 10px;
-  gap: 10px;
-}
-
-.location-item .label {
-  font-weight: 600;
-  min-width: 80px;
-}
-
-.location-item .value {
-  flex: 1;
-  font-family: 'Courier New', monospace;
-  background: rgba(255, 255, 255, 0.1);
-  padding: 4px 8px;
-  border-radius: 4px;
-}
-
-.location-item .value.error {
-  color: #ff7675;
-  background: rgba(255, 118, 117, 0.2);
-}
-
-.map-link {
-  color: #74b9ff;
-  text-decoration: none;
-  font-size: 0.9rem;
-  padding: 4px 8px;
-  background: rgba(255, 255, 255, 0.2);
-  border-radius: 4px;
-  transition: all 0.3s ease;
-}
-
-.map-link:hover {
-  background: rgba(255, 255, 255, 0.3);
-  transform: translateY(-1px);
-}
 
 .attendance-summary {
   background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);

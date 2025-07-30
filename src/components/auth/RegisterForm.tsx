@@ -6,7 +6,7 @@ import { useNavigate, Link } from 'react-router-dom';
 import { useAppDispatch } from '../../hooks/useAppDispatch';
 import { useAppSelector } from '../../hooks/useAppSelector';
 import { register as registerUser, clearError } from '../../store/slices/authSlice';
-import './AuthForms.css';
+import '../../styles/auth/AuthForms.css';
 
 const schema = yup.object({
   email: yup

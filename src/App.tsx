@@ -6,9 +6,9 @@ import { getCurrentUser } from './store/slices/authSlice';
 import LoginForm from './components/auth/LoginForm';
 import RegisterForm from './components/auth/RegisterForm';
 import Dashboard from './pages/Dashboard';
-import ProtectedRoute from './components/ProtectedRoute';
-import PublicRoute from './components/PublicRoute';
-import './App.css';
+import ProtectedRoute from './components/common/ProtectedRoute';
+import PublicRoute from './components/common/PublicRoute';
+import './styles/global/App.css';
 
 function AppContent() {
   const token = localStorage.getItem('token');

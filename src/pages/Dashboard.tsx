@@ -3,8 +3,8 @@ import { useNavigate } from 'react-router-dom';
 import { useAppDispatch } from '../hooks/useAppDispatch';
 import { useAppSelector } from '../hooks/useAppSelector';
 import { logout, getCurrentUser } from '../store/slices/authSlice';
-import AttendanceCard from '../components/AttendanceCard';
-import './Dashboard.css';
+import AttendanceCard from '../components/attendance/AttendanceCard';
+import '../styles/pages/Dashboard.css';
 
 const Dashboard: React.FC = () => {
   const navigate = useNavigate();

@@ -1,9 +1,9 @@
 import React, { useEffect, useState } from 'react';
-import { useAppDispatch } from '../hooks/useAppDispatch';
-import { useAppSelector } from '../hooks/useAppSelector';
-import { checkin, checkout, getTodayAttendance, clearError } from '../store/slices/attendanceSlice';
-import { getAllLocationInfo } from '../utils/locationUtils';
-import './AttendanceCard.css';
+import { useAppDispatch } from '../../hooks/useAppDispatch';
+import { useAppSelector } from '../../hooks/useAppSelector';
+import { checkin, checkout, getTodayAttendance, clearError } from '../../store/slices/attendanceSlice';
+import { getAllLocationInfo, isWithinAnyOfficeRadius } from '../../utils/locationUtils';
+import '../../styles/components/AttendanceCard.css';
 
 const AttendanceCard: React.FC = () => {
   const dispatch = useAppDispatch();
@@ -12,10 +12,6 @@ const AttendanceCard: React.FC = () => {
   
   const [currentTime, setCurrentTime] = useState(new Date());
   const [successMessage, setSuccessMessage] = useState<string | null>(null);
-  const [locationInfo, setLocationInfo] = useState<{
-    gps_location: { lat: number; lng: number } | null;
-    wifi_ssid: string | null;
-  } | null>(null);
 
   // Cập nhật thời gian hiện tại mỗi giây
   useEffect(() => {
@@ -52,12 +48,26 @@ const AttendanceCard: React.FC = () => {
 
   const handleCheckin = async () => {
     if (user) {
-      setSuccessMessage(null); // Clear previous messages
+      setSuccessMessage(null);
       
       try {
-        // Lấy thông tin GPS và WiFi
         const locationInfo = await getAllLocationInfo();
         console.log('📍 Checkin Location Info:', locationInfo);
+        
+        // Kiểm tra vị trí có trong phạm vi văn phòng không
+        if (locationInfo.gps_location) {
+          const locationCheck = isWithinAnyOfficeRadius(
+            locationInfo.gps_location.lat,
+            locationInfo.gps_location.lng
+          );
+          
+          if (!locationCheck.isInRange) {
+            setSuccessMessage(`❌ Vị trí quá xa văn phòng (${locationCheck.distance.toFixed(0)}m). Vui lòng đến gần văn phòng hơn.`);
+            return;
+          }
+          
+          console.log('🏢 Nearest Office:', locationCheck.nearestOffice);
+        }
         
         dispatch(checkin({
           user_id: user.id,
@@ -72,28 +82,33 @@ const AttendanceCard: React.FC = () => {
         });
       } catch (error) {
         console.error('❌ Error getting location for checkin:', error);
-        // Fallback: checkin không có location info
-        dispatch(checkin({
-          user_id: user.id,
-          location: 'Office',
-          note: 'Checkin via web app (no location data)'
-        })).then((result) => {
-          if (checkin.fulfilled.match(result)) {
-            setSuccessMessage('Checkin thành công! 🎉');
-          }
-        });
+        setSuccessMessage('❌ Lỗi khi lấy vị trí. Vui lòng thử lại.');
       }
     }
   };
 
   const handleCheckout = async () => {
     if (user) {
-      setSuccessMessage(null); // Clear previous messages
+      setSuccessMessage(null);
       
       try {
-        // Lấy thông tin GPS và WiFi
         const locationInfo = await getAllLocationInfo();
         console.log('📍 Checkout Location Info:', locationInfo);
+        
+        // Kiểm tra vị trí có trong phạm vi văn phòng không
+        if (locationInfo.gps_location) {
+          const locationCheck = isWithinAnyOfficeRadius(
+            locationInfo.gps_location.lat,
+            locationInfo.gps_location.lng
+          );
+          
+          if (!locationCheck.isInRange) {
+            setSuccessMessage(`❌ Vị trí quá xa văn phòng (${locationCheck.distance.toFixed(0)}m). Vui lòng đến gần văn phòng hơn.`);
+            return;
+          }
+          
+          console.log('🏢 Nearest Office:', locationCheck.nearestOffice);
+        }
         
         dispatch(checkout({
           user_id: user.id,
@@ -108,16 +123,7 @@ const AttendanceCard: React.FC = () => {
         });
       } catch (error) {
         console.error('❌ Error getting location for checkout:', error);
-        // Fallback: checkout không có location info
-        dispatch(checkout({
-          user_id: user.id,
-          location: 'Office',
-          note: 'Checkout via web app (no location data)'
-        })).then((result) => {
-          if (checkout.fulfilled.match(result)) {
-            setSuccessMessage('Checkout thành công! 👋');
-          }
-        });
+        setSuccessMessage('❌ Lỗi khi lấy vị trí. Vui lòng thử lại.');
       }
     }
   };
@@ -125,16 +131,6 @@ const AttendanceCard: React.FC = () => {
   const handleRefresh = () => {
     if (user) {
       dispatch(getTodayAttendance());
-    }
-  };
-
-  const handleTestLocation = async () => {
-    try {
-      const info = await getAllLocationInfo();
-      setLocationInfo(info);
-      console.log('🧪 Test Location Result:', info);
-    } catch (error) {
-      console.error('❌ Test Location Error:', error);
     }
   };
 
@@ -229,54 +225,7 @@ const AttendanceCard: React.FC = () => {
         >
           {isLoading ? 'Đang tải...' : '🔄 Làm mới'}
         </button>
-        
-        <button
-          className="location-test-btn"
-          onClick={handleTestLocation}
-          disabled={isLoading}
-        >
-          📍 Test Location
-        </button>
       </div>
-
-      {locationInfo && (
-        <div className="location-info">
-          <h4>📍 Thông tin Vị trí</h4>
-          {locationInfo.gps_location ? (
-            <div className="location-item">
-              <span className="label">GPS:</span>
-              <span className="value">
-                {locationInfo.gps_location.lat.toFixed(6)}, {locationInfo.gps_location.lng.toFixed(6)}
-              </span>
-              <a 
-                href={`https://www.google.com/maps?q=${locationInfo.gps_location.lat},${locationInfo.gps_location.lng}`}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="map-link"
-              >
-                🗺️ Xem trên bản đồ
-              </a>
-            </div>
-          ) : (
-            <div className="location-item">
-              <span className="label">GPS:</span>
-              <span className="value error">Không thể lấy vị trí</span>
-            </div>
-          )}
-          
-          {locationInfo.wifi_ssid ? (
-            <div className="location-item">
-              <span className="label">WiFi SSID:</span>
-              <span className="value">{locationInfo.wifi_ssid}</span>
-            </div>
-          ) : (
-            <div className="location-item">
-              <span className="label">WiFi SSID:</span>
-              <span className="value error">Không thể lấy thông tin WiFi</span>
-            </div>
-          )}
-        </div>
-      )}
 
       {todayRecord && (
         <div className="attendance-summary">
@@ -291,25 +240,6 @@ const AttendanceCard: React.FC = () => {
                todayRecord.status === 'late' ? 'Đi muộn' : 'Vắng mặt'}
             </span>
           </p>
-        </div>
-      )}
-
-      {/* Debug info - chỉ hiển thị trong development */}
-      {process.env.NODE_ENV === 'development' && (
-        <div className="debug-info">
-          <h4>Debug Info</h4>
-          <p><strong>Today Record:</strong> {todayRecord ? 'Có' : 'Không'}</p>
-          <p><strong>Can Checkin:</strong> {canCheckin ? 'Có' : 'Không'}</p>
-          <p><strong>Can Checkout:</strong> {canCheckout ? 'Có' : 'Không'}</p>
-          <p><strong>Is Loading:</strong> {isLoading ? 'Có' : 'Không'}</p>
-          {todayRecord && (
-            <div>
-              <p><strong>Raw Data:</strong></p>
-              <pre style={{ fontSize: '0.8rem', background: '#f5f5f5', padding: '10px', borderRadius: '5px' }}>
-                {JSON.stringify(todayRecord, null, 2)}
-              </pre>
-            </div>
-          )}
         </div>
       )}
     </div>
