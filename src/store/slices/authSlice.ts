@@ -34,18 +34,11 @@ export const register = createAsyncThunk(
     try {
       const response = await authAPI.register(userData);
       
-      // Lưu token vào localStorage
-      localStorage.setItem('token', response.data.access_token);
-      
-      // Lấy thông tin user sau khi đăng ký thành công
-      const userResponse = await authAPI.getCurrentUser();
-      
-      // Lưu user data vào localStorage
-      localStorage.setItem('user', JSON.stringify(userResponse.data));
+      // Không lưu token, user cần login sau khi register
       
       return {
-        access_token: response.data.access_token,
-        user: userResponse.data
+        access_token: null,
+        user: null
       };
     } catch (error: any) {
       return rejectWithValue(error.response?.data?.detail || 'Đăng ký thất bại');
@@ -130,10 +123,10 @@ const authSlice = createSlice({
       })
       .addCase(register.fulfilled, (state, action) => {
         state.isLoading = false;
-        state.isAuthenticated = true;
-        state.user = action.payload.user;
-        state.token = action.payload.access_token;
+        state.isAuthenticated = false; // Không set authenticated ngay
+        state.token = null; // Không lưu token ngay
         state.error = null;
+        // Sau register thành công, user cần login
       })
       .addCase(register.rejected, (state, action) => {
         state.isLoading = false;

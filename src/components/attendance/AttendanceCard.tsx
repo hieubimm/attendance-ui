@@ -2,7 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { useAppDispatch } from '../../hooks/useAppDispatch';
 import { useAppSelector } from '../../hooks/useAppSelector';
 import { checkin, checkout, getTodayAttendance, clearError } from '../../store/slices/attendanceSlice';
-import { getAllLocationInfo, isWithinAnyOfficeRadius } from '../../utils/locationUtils';
+import { getAllLocationInfo } from '../../utils/locationUtils';
 import '../../styles/components/AttendanceCard.css';
 
 const AttendanceCard: React.FC = () => {
@@ -54,27 +54,9 @@ const AttendanceCard: React.FC = () => {
         const locationInfo = await getAllLocationInfo();
         console.log('📍 Checkin Location Info:', locationInfo);
         
-        // Kiểm tra vị trí có trong phạm vi văn phòng không
-        if (locationInfo.gps_location) {
-          const locationCheck = isWithinAnyOfficeRadius(
-            locationInfo.gps_location.lat,
-            locationInfo.gps_location.lng
-          );
-          
-          if (!locationCheck.isInRange) {
-            setSuccessMessage(`❌ Vị trí quá xa văn phòng (${locationCheck.distance.toFixed(0)}m). Vui lòng đến gần văn phòng hơn.`);
-            return;
-          }
-          
-          console.log('🏢 Nearest Office:', locationCheck.nearestOffice);
-        }
-        
         dispatch(checkin({
           user_id: user.id,
-          location: 'Office',
-          note: 'Checkin via web app',
-          gps_location: locationInfo.gps_location || undefined,
-          wifi_ssid: locationInfo.wifi_ssid || undefined
+          gps_location: locationInfo.gps_location || undefined
         })).then((result) => {
           if (checkin.fulfilled.match(result)) {
             setSuccessMessage('Checkin thành công! 🎉');
@@ -95,27 +77,9 @@ const AttendanceCard: React.FC = () => {
         const locationInfo = await getAllLocationInfo();
         console.log('📍 Checkout Location Info:', locationInfo);
         
-        // Kiểm tra vị trí có trong phạm vi văn phòng không
-        if (locationInfo.gps_location) {
-          const locationCheck = isWithinAnyOfficeRadius(
-            locationInfo.gps_location.lat,
-            locationInfo.gps_location.lng
-          );
-          
-          if (!locationCheck.isInRange) {
-            setSuccessMessage(`❌ Vị trí quá xa văn phòng (${locationCheck.distance.toFixed(0)}m). Vui lòng đến gần văn phòng hơn.`);
-            return;
-          }
-          
-          console.log('🏢 Nearest Office:', locationCheck.nearestOffice);
-        }
-        
         dispatch(checkout({
           user_id: user.id,
-          location: 'Office',
-          note: 'Checkout via web app',
-          gps_location: locationInfo.gps_location || undefined,
-          wifi_ssid: locationInfo.wifi_ssid || undefined
+          gps_location: locationInfo.gps_location || undefined
         })).then((result) => {
           if (checkout.fulfilled.match(result)) {
             setSuccessMessage('Checkout thành công! 👋');

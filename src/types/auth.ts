@@ -61,18 +61,12 @@ export interface WiFiInfo {
 
 export interface CheckinRequest {
   user_id: number;
-  location?: string;
-  note?: string;
   gps_location?: GPSLocation;
-  wifi_ssid?: string;
 }
 
 export interface CheckoutRequest {
   user_id: number;
-  location?: string;
-  note?: string;
   gps_location?: GPSLocation;
-  wifi_ssid?: string;
 }
 
 export interface AttendanceResponse {

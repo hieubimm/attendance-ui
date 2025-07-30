@@ -1,4 +1,4 @@
-import React, { useEffect } from 'react';
+import React, { useEffect, useState } from 'react';
 import { useForm } from 'react-hook-form';
 import { yupResolver } from '@hookform/resolvers/yup';
 import * as yup from 'yup';
@@ -41,7 +41,8 @@ type RegisterFormData = yup.InferType<typeof schema>;
 const RegisterForm: React.FC = () => {
   const navigate = useNavigate();
   const dispatch = useAppDispatch();
-  const { isLoading, error, isAuthenticated } = useAppSelector((state) => state.auth);
+  const { isLoading, error } = useAppSelector((state) => state.auth);
+  const [registerSuccess, setRegisterSuccess] = useState(false);
 
   const {
     register,
@@ -52,10 +53,11 @@ const RegisterForm: React.FC = () => {
   });
 
   useEffect(() => {
-    if (isAuthenticated) {
-      navigate('/dashboard');
+    if (registerSuccess) {
+      // Sau khi register thành công, chuyển đến trang login
+      navigate('/login');
     }
-  }, [isAuthenticated, navigate]);
+  }, [registerSuccess, navigate]);
 
   useEffect(() => {
     return () => {
@@ -65,7 +67,10 @@ const RegisterForm: React.FC = () => {
 
   const onSubmit = async (data: RegisterFormData) => {
     const { confirmPassword, ...registerData } = data;
-    dispatch(registerUser(registerData));
+    const result = await dispatch(registerUser(registerData));
+    if (registerUser.fulfilled.match(result)) {
+      setRegisterSuccess(true);
+    }
   };
 
   return (
