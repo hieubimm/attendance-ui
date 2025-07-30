@@ -34,10 +34,6 @@ const schema = yup.object({
     .string()
     .oneOf([yup.ref('password')], 'Mật khẩu xác nhận không khớp')
     .required('Xác nhận mật khẩu là bắt buộc'),
-  role: yup
-    .string()
-    .oneOf(['admin', 'user'], 'Vai trò không hợp lệ')
-    .required('Vai trò là bắt buộc'),
 }).required();
 
 type RegisterFormData = yup.InferType<typeof schema>;
@@ -155,20 +151,6 @@ const RegisterForm: React.FC = () => {
             {errors.confirmPassword && (
               <span className="error-text">{errors.confirmPassword.message}</span>
             )}
-          </div>
-
-          <div className="form-group">
-            <label htmlFor="role">Vai trò</label>
-            <select
-              id="role"
-              {...register('role')}
-              className={errors.role ? 'error' : ''}
-            >
-              <option value="">Chọn vai trò</option>
-              <option value="user">User</option>
-              <option value="admin">Admin</option>
-            </select>
-            {errors.role && <span className="error-text">{errors.role.message}</span>}
           </div>
 
           <button type="submit" className="auth-button" disabled={isLoading}>

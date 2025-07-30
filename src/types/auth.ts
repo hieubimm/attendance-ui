@@ -1,17 +1,14 @@
 // Types cho Authentication
 export interface User {
-  id: string;
+  id: number;
   email: string;
-  username: string;
   full_name: string;
   phone: string;
-  role: string;
-  created_at: string;
-  updated_at: string;
+  is_active: boolean;
 }
 
 export interface LoginRequest {
-  email: string;
+  username: string;
   password: string;
 }
 
@@ -21,13 +18,15 @@ export interface RegisterRequest {
   full_name: string;
   password: string;
   phone: string;
-  role: string;
 }
 
 export interface AuthResponse {
-  access_token: string;
-  token_type: string;
-  user: User;
+  code: string;
+  message: string;
+  data: {
+    access_token: string;
+    token_type: string;
+  };
 }
 
 export interface AuthState {
@@ -36,4 +35,57 @@ export interface AuthState {
   isAuthenticated: boolean;
   isLoading: boolean;
   error: string | null;
+}
+
+// Types cho Attendance
+export interface AttendanceRecord {
+  id: number;
+  user_id: number;
+  checkin_time: string;
+  checkout_time?: string;
+  date: string;
+  total_hours?: number;
+  status: 'present' | 'absent' | 'late';
+}
+
+export interface GPSLocation {
+  lat: number;
+  lng: number;
+}
+
+export interface WiFiInfo {
+  ssid: string;
+  bssid?: string;
+  signal_strength?: number;
+}
+
+export interface CheckinRequest {
+  user_id: number;
+  location?: string;
+  note?: string;
+  gps_location?: GPSLocation;
+  wifi_ssid?: string;
+}
+
+export interface CheckoutRequest {
+  user_id: number;
+  location?: string;
+  note?: string;
+  gps_location?: GPSLocation;
+  wifi_ssid?: string;
+}
+
+export interface AttendanceResponse {
+  code: string;
+  message: string;
+  data: AttendanceRecord;
+}
+
+export interface AttendanceState {
+  currentRecord: AttendanceRecord | null;
+  todayRecord: AttendanceRecord | null;
+  isLoading: boolean;
+  error: string | null;
+  lastCheckinTime: string | null;
+  lastCheckoutTime: string | null;
 } 

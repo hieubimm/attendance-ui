@@ -9,10 +9,10 @@ import { login, clearError } from '../../store/slices/authSlice';
 import './AuthForms.css';
 
 const schema = yup.object({
-  email: yup
+  username: yup
     .string()
-    .email('Email không hợp lệ')
-    .required('Email là bắt buộc'),
+    .min(3, 'Tên đăng nhập phải có ít nhất 3 ký tự')
+    .required('Tên đăng nhập là bắt buộc'),
   password: yup
     .string()
     .min(6, 'Mật khẩu phải có ít nhất 6 ký tự')
@@ -62,15 +62,15 @@ const LoginForm: React.FC = () => {
           {error && <div className="error-message">{error}</div>}
 
           <div className="form-group">
-            <label htmlFor="email">Email</label>
+            <label htmlFor="username">Tên đăng nhập</label>
             <input
-              type="email"
-              id="email"
-              {...register('email')}
-              placeholder="Nhập email của bạn"
-              className={errors.email ? 'error' : ''}
+              type="text"
+              id="username"
+              {...register('username')}
+              placeholder="Nhập tên đăng nhập"
+              className={errors.username ? 'error' : ''}
             />
-            {errors.email && <span className="error-text">{errors.email.message}</span>}
+            {errors.username && <span className="error-text">{errors.username.message}</span>}
           </div>
 
           <div className="form-group">

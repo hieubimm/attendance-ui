@@ -8,10 +8,20 @@ export const login = createAsyncThunk(
   async (credentials: LoginRequest, { rejectWithValue }) => {
     try {
       const response = await authAPI.login(credentials);
-      // Lưu token và user vào localStorage
-      localStorage.setItem('token', response.access_token);
-      localStorage.setItem('user', JSON.stringify(response.user));
-      return response;
+      
+      // Lưu token vào localStorage
+      localStorage.setItem('token', response.data.access_token);
+      
+      // Lấy thông tin user sau khi đăng nhập thành công
+      const userResponse = await authAPI.getCurrentUser();
+      
+      // Lưu user data vào localStorage
+      localStorage.setItem('user', JSON.stringify(userResponse.data));
+      
+      return {
+        access_token: response.data.access_token,
+        user: userResponse.data
+      };
     } catch (error: any) {
       return rejectWithValue(error.response?.data?.detail || 'Đăng nhập thất bại');
     }
@@ -23,10 +33,20 @@ export const register = createAsyncThunk(
   async (userData: RegisterRequest, { rejectWithValue }) => {
     try {
       const response = await authAPI.register(userData);
-      // Lưu token và user vào localStorage
-      localStorage.setItem('token', response.access_token);
-      localStorage.setItem('user', JSON.stringify(response.user));
-      return response;
+      
+      // Lưu token vào localStorage
+      localStorage.setItem('token', response.data.access_token);
+      
+      // Lấy thông tin user sau khi đăng ký thành công
+      const userResponse = await authAPI.getCurrentUser();
+      
+      // Lưu user data vào localStorage
+      localStorage.setItem('user', JSON.stringify(userResponse.data));
+      
+      return {
+        access_token: response.data.access_token,
+        user: userResponse.data
+      };
     } catch (error: any) {
       return rejectWithValue(error.response?.data?.detail || 'Đăng ký thất bại');
     }
@@ -38,7 +58,7 @@ export const getCurrentUser = createAsyncThunk(
   async (_, { rejectWithValue }) => {
     try {
       const response = await authAPI.getCurrentUser();
-      return response;
+      return response.data;
     } catch (error: any) {
       return rejectWithValue(error.response?.data?.detail || 'Không thể lấy thông tin user');
     }
@@ -63,7 +83,7 @@ export const logout = createAsyncThunk(
 
 // Initial state
 const initialState: AuthState = {
-  user: null,
+  user: localStorage.getItem('user') ? JSON.parse(localStorage.getItem('user')!) : null,
   token: localStorage.getItem('token'),
   isAuthenticated: !!localStorage.getItem('token'),
   isLoading: false,

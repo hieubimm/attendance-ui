@@ -1,5 +1,5 @@
 import axios from 'axios';
-import { LoginRequest, RegisterRequest, AuthResponse } from '../types/auth';
+import { LoginRequest, RegisterRequest, AuthResponse, CheckinRequest, CheckoutRequest, AttendanceResponse } from '../types/auth';
 
 // Tạo instance axios với base URL
 const API_BASE_URL = 'http://34.126.96.127:8000/api';
@@ -56,13 +56,44 @@ export const authAPI = {
 
   // Lấy thông tin user hiện tại
   getCurrentUser: async () => {
-    const response = await api.get('/users/me');
+    const response = await api.get('/user/me');
     return response.data;
   },
 
   // Đăng xuất
   logout: async () => {
     const response = await api.post('/logout');
+    return response.data;
+  },
+};
+
+// Attendance API functions
+export const attendanceAPI = {
+  // Checkin
+  checkin: async (data: CheckinRequest): Promise<AttendanceResponse> => {
+    const response = await api.post('/attendance/checkin', data);
+    return response.data;
+  },
+
+  // Checkout
+  checkout: async (data: CheckoutRequest): Promise<AttendanceResponse> => {
+    const response = await api.post('/attendance/checkout', data);
+    return response.data;
+  },
+
+  // Lấy thông tin attendance hôm nay
+  getTodayAttendance: async () => {
+    const response = await api.get('/user/attendance-today');
+    return response.data;
+  },
+
+  // Lấy lịch sử attendance
+  getAttendanceHistory: async (startDate?: string, endDate?: string) => {
+    const params = new URLSearchParams();
+    if (startDate) params.append('start_date', startDate);
+    if (endDate) params.append('end_date', endDate);
+    
+    const response = await api.get(`/attendance/history?${params.toString()}`);
     return response.data;
   },
 };
